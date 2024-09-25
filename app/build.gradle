@@ -112,8 +112,8 @@ dependencies {
     implementation 'com.google.net.cronet:cronet-okhttp:0.1.0'
 //    implementation 'com.google.android.gms:play-services-cronet:18.0.1'
     implementation files('libs/xwalk_shared_library-23.53.589.4.aar')
-    implementation 'org.chromium.net:cronet-embedded:101.4951.41'
-  //  implementation ('org.chromium.net:cronet-embedded:98.4758.101')
+ //   implementation 'org.chromium.net:cronet-embedded:101.4951.41'
+   implementation ('org.chromium.net:cronet-embedded:98.4758.101')
 }
 configurations {
     all {
