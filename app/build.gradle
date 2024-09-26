@@ -56,11 +56,7 @@ android {
         additionalParameters += '--set-max-idx-number=48000'
         additionalParameters += '--minimal-main-dex'
     }
-     configurations {
-        all { // You should exclude one of them not both of them
-            exclude group: "org.chromium.net", module: "cronet-embedded"
-        }
-    }
+  
 }
 
 dependencies {
@@ -114,9 +110,4 @@ dependencies {
     implementation files('libs/xwalk_shared_library-23.53.589.4.aar')
     implementation 'org.chromium.net:cronet-embedded:101.4951.41'
 //   implementation ('org.chromium.net:cronet-embedded:98.4758.101')
-}
-configurations {
-    all {
-        exclude group: 'org.chromium', module: 'base'
-    }
 }
