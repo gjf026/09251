@@ -122,6 +122,8 @@ public class RemoteServer extends NanoHTTPD {
                                     mime,
                                     stream
                             );
+                             if (rs.length > 3) {
+                                 try {
                          HashMap<String, String> mapHeader = rs[3] != null ? (HashMap<String, String>) rs[3] : null;
                        //  response.addHeader("Location", mapHeader.get("Location"));
                             if(!mapHeader.isEmpty()){
@@ -129,7 +131,12 @@ public class RemoteServer extends NanoHTTPD {
                                     response.addHeader(key, mapHeader.get(key));
                                 }
                             }
+                                 }catch (Throwable th) {
+                                th.printStackTrace();
+                            }
+                        }
                          return response;
+                             
                         } catch (Throwable th) {
                             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "500");
                         }
