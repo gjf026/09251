@@ -122,19 +122,14 @@ public class RemoteServer extends NanoHTTPD {
                                     mime,
                                     stream
                             );
-                             if (rs.length > 3) {
-                                 try {
-                         HashMap<String, String> mapHeader = rs[3] != null ? (HashMap<String, String>) rs[3] : null;
-                       //  response.addHeader("Location", mapHeader.get("Location"));
-                            if(!mapHeader.isEmpty()){
-                                for (String key : mapHeader.keySet()){
-                                    response.addHeader(key, mapHeader.get(key));
+                      if(rs.length>=4){
+                                HashMap<String, String> mapHeader = (HashMap<String, String>) rs[3];
+                                if(!mapHeader.isEmpty()){
+                                    for (String key : mapHeader.keySet()) {
+                                        response.addHeader(key, mapHeader.get(key));
+                                    }
                                 }
                             }
-                                 }catch (Throwable th) {
-                                th.printStackTrace();
-                            }
-                        }
                          return response;
                              
                         } catch (Throwable th) {
