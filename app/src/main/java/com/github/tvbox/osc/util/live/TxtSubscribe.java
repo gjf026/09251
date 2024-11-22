@@ -32,12 +32,12 @@ public class TxtSubscribe {
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.equals("")) continue;
                 if (line.startsWith("#EXTM3U")) continue;
-                if (line.startsWith("#KODIPROP")) continue;
+                if (isSetting(line)) continue;
                 if (line.startsWith("#EXTINF") || line.contains("#EXTINF")) {
                     String name = getStrByRegex(NAME_PATTERN, line);
                     String group = getStrByRegex(GROUP_PATTERN, line);
                     String url = bufferedReader.readLine().trim();
-                    if (!url.isEmpty() && (url.startsWith("http") || url.startsWith("rtp") || url.startsWith("rtsp") || url.startsWith("rtmp"))) {
+                    if (isUrl(url)) {
                         if (linkedHashMap.containsKey(group)) {
                             channelTemp = linkedHashMap.get(group);
                         } else {
@@ -67,6 +67,14 @@ public class TxtSubscribe {
         return pattern.pattern().equals(GROUP_PATTERN.pattern()) ? "未分组" : "未命名";
     }
 
+    private static boolean isUrl(String url) {
+        return !url.isEmpty() && (url.startsWith("http") || url.startsWith("rtp") || url.startsWith("rtsp") || url.startsWith("rtmp"));
+    }
+
+    private static boolean isSetting(String line) {
+        return line.startsWith("ua") || line.startsWith("parse") || line.startsWith("click") || line.startsWith("player") || line.startsWith("header") || line.startsWith("format") || line.startsWith("origin") || line.startsWith("referer") || line.startsWith("#EXTHTTP:") || line.startsWith("#EXTVLCOPT:") || line.startsWith("#KODIPROP:");
+    }
+
     public static void parseTxt(LinkedHashMap<String, LinkedHashMap<String, ArrayList<String>>> linkedHashMap, String str) {
         ArrayList<String> arrayList;
         try {
@@ -94,7 +102,7 @@ public class TxtSubscribe {
                             String trim2 = split[0].trim();
                             for (String str2 : split[1].trim().split("#")) {
                                 String trim3 = str2.trim();
-                                if (!trim3.isEmpty() && (trim3.startsWith("http") || trim3.startsWith("rtp") || trim3.startsWith("rtsp") || trim3.startsWith("rtmp"))) {
+                                if (isUrl(trim3)) {
                                     if (!linkedHashMap3.containsKey(trim2)) {
                                         arrayList = new ArrayList<>();
                                         linkedHashMap3.put(trim2, arrayList);
