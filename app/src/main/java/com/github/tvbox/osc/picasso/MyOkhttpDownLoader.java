@@ -34,7 +34,10 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
+import android.util.Base64;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.ResponseBody;
 /**
  * A {@link Downloader} which uses OkHttp to download images.
  */
