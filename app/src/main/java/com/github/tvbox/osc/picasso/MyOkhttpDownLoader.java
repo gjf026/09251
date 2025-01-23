@@ -16,6 +16,7 @@
 package com.github.tvbox.osc.picasso;
 
 import android.text.TextUtils;
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -31,13 +32,13 @@ import java.net.URLDecoder;
 
 import okhttp3.Cache;
 import okhttp3.Call;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import android.util.Base64;
-import okhttp3.MediaType;
-import okhttp3.Protocol;
 import okhttp3.ResponseBody;
+
 /**
  * A {@link Downloader} which uses OkHttp to download images.
  */
@@ -63,23 +64,7 @@ public final class MyOkhttpDownLoader implements Downloader {
         this.client = client;
         this.cache = null;
     }
-    //支持base64图片方法
-private Response handleBase64Image(String base64Url) throws IOException {
-        // 提取 Base64 数据部分
-        String base64Data = base64Url.substring(base64Url.indexOf(",") + 1);
 
-        // 解码 Base64 数据为字节数组
-        byte[] imageBytes = Base64.decode(base64Data, Base64.DEFAULT);
-
-        // 构造 Response 返回
-        return new Response.Builder()
-                .request(new Request.Builder().url(base64Url).build())
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .message("OK")
-                .body(ResponseBody.create(MediaType.parse("image/*"), imageBytes))
-                .build();
-    }
     @NonNull
     @Override
     public Response load(@NonNull Request request) throws IOException {
@@ -89,10 +74,11 @@ private Response handleBase64Image(String base64Url) throws IOException {
         String ua = null;
         String referer = null;
 
-     //检查是否是 Base64 图片
-     if(url.startsWith("data:image")){
-      return handleBase64Image(url);
-      }
+        // 检查是否是 Base64 图片
+        if (url.startsWith("data:image")) {
+            return handleBase64Image(url);
+        }
+
         //检查链接里面是否有自定义header
         if (url.contains("@Headers=")){
             header =url.split("@Headers=")[1].split("@")[0];
@@ -141,5 +127,22 @@ private Response handleBase64Image(String base64Url) throws IOException {
             } catch (IOException ignored) {
             }
         }
+    }
+
+    private Response handleBase64Image(String base64Url) throws IOException {
+        // 提取 Base64 数据部分
+        String base64Data = base64Url.substring(base64Url.indexOf(",") + 1);
+
+        // 解码 Base64 数据为字节数组
+        byte[] imageBytes = Base64.decode(base64Data, Base64.DEFAULT);
+
+        // 构造 Response 返回
+        return new Response.Builder()
+                .request(new Request.Builder().url(base64Url).build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(ResponseBody.create(MediaType.parse("image/*"), imageBytes))
+                .build();
     }
 }
