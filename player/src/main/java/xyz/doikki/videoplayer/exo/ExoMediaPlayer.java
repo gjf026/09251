@@ -2,6 +2,7 @@ package xyz.doikki.videoplayer.exo;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -24,8 +25,13 @@ import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.EventLogger;
 import com.google.android.exoplayer2.video.VideoSize;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Map;
 
+import okhttp3.Dns;
+import okhttp3.OkHttpClient;
 import xyz.doikki.videoplayer.player.AbstractPlayer;
 import xyz.doikki.videoplayer.player.VideoViewManager;
 import xyz.doikki.videoplayer.util.PlayerUtils;
@@ -47,7 +53,25 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
 
     public ExoMediaPlayer(Context context) {
         mAppContext = context.getApplicationContext();
+        // 初始化 ExoMediaSourceHelper 实例
         mMediaSourceHelper = ExoMediaSourceHelper.getInstance(context);
+        // 构造自定义的 OkHttpClient，加入自定义 DNS 逻辑：
+        // 当请求的域名以 "cache.ott" 开头时，使用 "base-v4-free-mghy.e.cdn.chinamobile.com" 解析
+        OkHttpClient customOkHttpClient = new OkHttpClient.Builder()
+                .dns(new Dns() {
+                    @Override
+                    public List<InetAddress> lookup(String hostname) throws UnknownHostException {
+                        Log.i("tvbox","url---"+hostname);
+                        if (hostname != null && hostname.matches("^cache\\.ott\\.[^.]+\\.cmvideo\\.cn$")) {
+                            // 这里将 hostname 强制解析为目标域名
+                            return Dns.SYSTEM.lookup("base-v4-free-mghy.e.cdn.chinamobile.com");
+                        }
+                        return Dns.SYSTEM.lookup(hostname);
+                    }
+                })
+                .build();
+        // 注入自定义 OkHttpClient 到 ExoMediaSourceHelper 中
+        mMediaSourceHelper.setOkClient(customOkHttpClient);
     }
 
     @Override
@@ -63,7 +87,7 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
                 .build();
         setOptions();
 
-        //播放器日志
+        // 播放器日志（当开启日志且 mTrackSelector 为 MappingTrackSelector 时）
         if (VideoViewManager.getConfig().mIsEnableLog && mTrackSelector instanceof MappingTrackSelector) {
             mInternalPlayer.addAnalyticsListener(new EventLogger((MappingTrackSelector) mTrackSelector, "ExoPlayer"));
         }
@@ -90,7 +114,7 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
 
     @Override
     public void setDataSource(AssetFileDescriptor fd) {
-        //no support
+        // 不支持AssetFileDescriptor方式
     }
 
     @Override
@@ -167,7 +191,6 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
             mInternalPlayer.release();
             mInternalPlayer = null;
         }
-
         mIsPreparing = false;
         mSpeedPlaybackParameters = null;
     }
@@ -220,7 +243,7 @@ public class ExoMediaPlayer extends AbstractPlayer implements Player.Listener {
 
     @Override
     public void setOptions() {
-        //准备好就开始播放
+        // 准备好就开始播放
         mInternalPlayer.setPlayWhenReady(true);
     }
 
